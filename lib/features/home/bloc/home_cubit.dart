@@ -1,6 +1,7 @@
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 part 'home_state.dart';
 
@@ -12,25 +13,6 @@ class HomeCubit extends Cubit<HomeState> {
           activityDots: _generateActivityDots(initialDate),
         ),
       );
-
-  /// Format date for display
-  String formatDate(DateTime date) {
-    const months = [
-      'Jan',
-      'Feb',
-      'Mar',
-      'Apr',
-      'May',
-      'Jun',
-      'Jul',
-      'Aug',
-      'Sep',
-      'Oct',
-      'Nov',
-      'Dec',
-    ];
-    return 'Today, ${date.day} ${months[date.month - 1]} ${date.year}';
-  }
 
   /// Update selected date
   void setDate(DateTime date) {

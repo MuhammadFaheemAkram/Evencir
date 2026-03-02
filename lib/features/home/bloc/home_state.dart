@@ -1,10 +1,7 @@
 part of 'home_cubit.dart';
 
 class HomeState extends Equatable {
-  const HomeState({
-    required this.selectedDate,
-    required this.activityDots,
-  });
+  const HomeState({required this.selectedDate, required this.activityDots});
 
   final DateTime selectedDate;
   final Map<DateTime, List<Color>> activityDots;
@@ -17,6 +14,16 @@ class HomeState extends Equatable {
       selectedDate: selectedDate ?? this.selectedDate,
       activityDots: activityDots ?? this.activityDots,
     );
+  }
+
+  String get formatDate {
+    final formattedDate = DateFormat('dd MMM yyyy').format(selectedDate);
+    if (selectedDate.year == DateTime.now().year &&
+        selectedDate.month == DateTime.now().month &&
+        selectedDate.day == DateTime.now().day) {
+      return 'Today, $formattedDate';
+    }
+    return formattedDate;
   }
 
   @override

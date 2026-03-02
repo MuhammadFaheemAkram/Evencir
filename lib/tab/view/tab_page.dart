@@ -10,7 +10,7 @@ class TabPage extends StatelessWidget {
     return MultiBlocProvider(
       providers: [
         BlocProvider(create: (_) => TabCubit(initialTab: initialTab)),
-        BlocProvider(create: (_) => DateCubit()),
+        BlocProvider(create: (_) => DateCubit(initialDate: DateTime.now())),
       ],
       child: const TabView(),
     );

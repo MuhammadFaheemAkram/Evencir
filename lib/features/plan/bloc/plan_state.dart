@@ -27,6 +27,16 @@ class PlanState extends Equatable {
     );
   }
 
+  List<String> get dayNames => [
+    'Mon',
+    'Tue',
+    'Wed',
+    'Thu',
+    'Fri',
+    'Sat',
+    'Sun',
+  ];
+
   @override
   List<Object> get props => [plans, selectedDate, weeks, isLoading];
 }
