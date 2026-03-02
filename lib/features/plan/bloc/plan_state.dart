@@ -8,13 +8,13 @@ class PlanState extends Equatable {
     required this.isLoading,
   });
 
-  final Map<DateTime, TrainingEntry> plans;
+  final Map<DateTime, TrainingModel> plans;
   final DateTime selectedDate;
   final List<List<DateTime>> weeks;
   final bool isLoading;
 
   PlanState copyWith({
-    Map<DateTime, TrainingEntry>? plans,
+    Map<DateTime, TrainingModel>? plans,
     DateTime? selectedDate,
     List<List<DateTime>>? weeks,
     bool? isLoading,

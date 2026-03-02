@@ -1,6 +1,6 @@
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
-import 'package:evencir_project/models/training_entry.dart';
+import 'package:evencir_project/features/plan/models/training_model.dart';
 import 'package:flutter/material.dart';
 
 part 'plan_state.dart';
@@ -48,29 +48,29 @@ class PlanCubit extends Cubit<PlanState> {
   }
 
   /// Initialize sample plans for the month
-  Map<DateTime, TrainingEntry> _initSamplePlans(DateTime date) {
+  Map<DateTime, TrainingModel> _initSamplePlans(DateTime date) {
     final y = date.year;
     final m = date.month;
     return {
-      DateTime(y, m, 8): const TrainingEntry(
+      DateTime(y, m, 8): const TrainingModel(
         workoutType: 'Arms Workout',
         name: 'Arm Blaster',
         duration: '25m - 30m',
         badgeColor: Color(0xFF2A8C82),
       ),
-      DateTime(y, m, 11): const TrainingEntry(
+      DateTime(y, m, 11): const TrainingModel(
         workoutType: 'Leg Workout',
         name: 'Leg Day Blitz',
         duration: '25m - 30m',
         badgeColor: Color(0xFF7B61FF),
       ),
-      DateTime(y, m, 13): const TrainingEntry(
+      DateTime(y, m, 13): const TrainingModel(
         workoutType: 'Intervals',
         name: 'Descending Hi Reps',
         duration: '6km',
         badgeColor: Color(0xFF2A8C82),
       ),
-      DateTime(y, m, 14): const TrainingEntry(
+      DateTime(y, m, 14): const TrainingModel(
         workoutType: 'Intervals',
         name: 'Shorter Intervals',
         duration: '3km',
@@ -152,7 +152,7 @@ class PlanCubit extends Cubit<PlanState> {
     final entry = state.plans.remove(from);
     if (entry != null) {
       final existing = state.plans[to];
-      final newPlans = Map<DateTime, TrainingEntry>.from(state.plans);
+      final newPlans = Map<DateTime, TrainingModel>.from(state.plans);
       newPlans[to] = entry;
       if (existing != null) {
         newPlans[from] = existing;

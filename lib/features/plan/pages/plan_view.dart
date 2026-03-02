@@ -1,7 +1,7 @@
 import 'package:evencir_project/core/theme/app_colors_extension.dart';
 import 'package:evencir_project/core/utils/app_icons.dart';
 import 'package:evencir_project/features/plan/bloc/plan_cubit.dart';
-import 'package:evencir_project/models/training_entry.dart';
+import 'package:evencir_project/features/plan/models/training_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
@@ -41,78 +41,145 @@ class _PlanViewState extends State<PlanView> {
 
   @override
   Widget build(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-        leading: Text(
-          'Training Calendar',
-          style: textTheme.headlineSmall?.copyWith(
-            fontWeight: FontWeight.w700,
-            fontSize: 24,
-          ),
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          textAlign: TextAlign.end,
+      appBar: const _PlanAppBar(),
+      body: _PlanBody(scrollController: _scrollController),
+    );
+  }
+}
+
+// ── Private Widget Classes ──
+
+class _PlanAppBar extends StatelessWidget implements PreferredSizeWidget {
+  const _PlanAppBar();
+
+  @override
+  final preferredSize = const Size.fromHeight(kToolbarHeight + 24);
+
+  @override
+  Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+    return AppBar(
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      leading: Text(
+        'Training Calendar',
+        style: textTheme.headlineSmall?.copyWith(
+          fontWeight: FontWeight.w700,
+          fontSize: 24,
         ),
-        actions: [
-          GestureDetector(
-            onTap: () {},
-            child: Text(
-              'Save',
-              style: textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w700,
-                fontSize: 18,
-              ),
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+        textAlign: TextAlign.end,
+      ),
+      actions: [
+        GestureDetector(
+          onTap: () {},
+          child: Text(
+            'Save',
+            style: textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.w700,
+              fontSize: 18,
             ),
           ),
-        ],
-        actionsPadding: const EdgeInsets.only(right: 16, bottom: 24),
-        leadingWidth: 220,
-      ),
-      body: SafeArea(
-        child: BlocBuilder<PlanCubit, PlanState>(
-          buildWhen:
-              (previous, current) =>
-                  previous.selectedDate != current.selectedDate ||
-                  previous.plans != current.plans,
-          builder: (context, state) {
-            final cubit = context.read<PlanCubit>();
-            final totalWeeks = cubit.totalWeeksInMonth(state.selectedDate);
-            final currentWeekNum = cubit.weekOfMonth(state.selectedDate);
-
-            return ScrollablePositionedList.builder(
-              itemScrollController: _scrollController,
-              padding: const EdgeInsets.only(bottom: 24),
-              itemCount: state.weeks.length,
-              itemBuilder: (context, index) {
-                final week = state.weeks[index];
-                final weekNum = cubit.weekOfMonth(week.first);
-                return _buildWeekSection(
-                  cubit: cubit,
-                  days: week,
-                  weekNumber: weekNum,
-                  totalWeeks: totalWeeks,
-                  isCurrentWeek: weekNum == currentWeekNum,
-                  plans: state.plans,
-                );
-              },
-            );
-          },
         ),
+      ],
+      actionsPadding: const EdgeInsets.only(right: 16, bottom: 24),
+      leadingWidth: 220,
+    );
+  }
+}
+
+class _PlanBody extends StatelessWidget {
+  const _PlanBody({required this.scrollController});
+
+  final ItemScrollController scrollController;
+
+  @override
+  Widget build(BuildContext context) {
+    return SafeArea(
+      child: BlocBuilder<PlanCubit, PlanState>(
+        buildWhen:
+            (previous, current) =>
+                previous.selectedDate != current.selectedDate ||
+                previous.plans != current.plans,
+        builder: (context, state) {
+          final cubit = context.read<PlanCubit>();
+          final totalWeeks = cubit.totalWeeksInMonth(state.selectedDate);
+          final currentWeekNum = cubit.weekOfMonth(state.selectedDate);
+
+          return _PlanWeeksList(
+            weeks: state.weeks,
+            scrollController: scrollController,
+            cubit: cubit,
+            plans: state.plans,
+            totalWeeks: totalWeeks,
+            currentWeekNum: currentWeekNum,
+          );
+        },
       ),
     );
   }
+}
 
-  Widget _buildWeekSection({
-    required PlanCubit cubit,
-    required List<DateTime> days,
-    required int weekNumber,
-    required int totalWeeks,
-    required bool isCurrentWeek,
-    required Map<DateTime, TrainingEntry> plans,
-  }) {
+class _PlanWeeksList extends StatelessWidget {
+  const _PlanWeeksList({
+    required this.weeks,
+    required this.scrollController,
+    required this.cubit,
+    required this.plans,
+    required this.totalWeeks,
+    required this.currentWeekNum,
+  });
+
+  final List<List<DateTime>> weeks;
+  final ItemScrollController scrollController;
+  final PlanCubit cubit;
+  final Map<DateTime, TrainingModel> plans;
+  final int totalWeeks;
+  final int currentWeekNum;
+
+  @override
+  Widget build(BuildContext context) {
+    return ScrollablePositionedList.builder(
+      itemScrollController: scrollController,
+      padding: const EdgeInsets.only(bottom: 24),
+      itemCount: weeks.length,
+      itemBuilder: (context, index) {
+        final week = weeks[index];
+        final weekNum = cubit.weekOfMonth(week.first);
+        return _PlanWeekSection(
+          cubit: cubit,
+          days: week,
+          weekNumber: weekNum,
+          totalWeeks: totalWeeks,
+          isCurrentWeek: weekNum == currentWeekNum,
+          plans: plans,
+        );
+      },
+    );
+  }
+}
+
+class _PlanWeekSection extends StatelessWidget {
+  const _PlanWeekSection({
+    required this.cubit,
+    required this.days,
+    required this.weekNumber,
+    required this.totalWeeks,
+    required this.isCurrentWeek,
+    required this.plans,
+  });
+
+  final PlanCubit cubit;
+  final List<DateTime> days;
+  final int weekNumber;
+  final int totalWeeks;
+  final bool isCurrentWeek;
+  final Map<DateTime, TrainingModel> plans;
+
+  @override
+  Widget build(BuildContext context) {
     final colors = context.appColors;
     final textTheme = Theme.of(context).textTheme;
 
@@ -169,23 +236,32 @@ class _PlanViewState extends State<PlanView> {
         ),
         const SizedBox(height: 4),
         // Day rows
-        ...days.map((day) => _buildDayRow(context, cubit, day, plans)),
+        ...days.map((day) => _PlanDayRow(cubit: cubit, day: day, plans: plans)),
         const SizedBox(height: 8),
       ],
     );
   }
+}
 
-  Widget _buildDayRow(
-    BuildContext context,
-    PlanCubit cubit,
-    DateTime day,
-    Map<DateTime, TrainingEntry> plans,
-  ) {
+class _PlanDayRow extends StatelessWidget {
+  const _PlanDayRow({
+    required this.cubit,
+    required this.day,
+    required this.plans,
+  });
+
+  final PlanCubit cubit;
+  final DateTime day;
+  final Map<DateTime, TrainingModel> plans;
+
+  @override
+  Widget build(BuildContext context) {
     final normalized = DateTime(day.year, day.month, day.day);
     final entry = plans[normalized];
     final colors = context.appColors;
     final dayNames = cubit.state.dayNames;
-    return DragTarget<MapEntry<DateTime, TrainingEntry>>(
+
+    return DragTarget<MapEntry<DateTime, TrainingModel>>(
       onAcceptWithDetails: (details) {
         cubit.movePlan(details.data.key, normalized);
       },
@@ -202,28 +278,36 @@ class _PlanViewState extends State<PlanView> {
             padding: const EdgeInsets.symmetric(horizontal: 20),
             child:
                 entry != null
-                    ? _buildDayWithWorkout(
-                      context,
-                      normalized,
-                      day,
-                      entry,
-                      dayNames,
+                    ? _PlanDayWithWorkout(
+                      date: normalized,
+                      day: day,
+                      entry: entry,
+                      dayNames: dayNames,
                     )
-                    : _buildEmptyDay(context, day, dayNames),
+                    : _PlanEmptyDay(day: day, dayNames: dayNames),
           ),
         );
       },
     );
   }
+}
 
-  Widget _buildDayWithWorkout(
-    BuildContext context,
-    DateTime date,
-    DateTime day,
-    TrainingEntry entry,
-    List<String> dayNames,
-  ) {
-    return Draggable<MapEntry<DateTime, TrainingEntry>>(
+class _PlanDayWithWorkout extends StatelessWidget {
+  const _PlanDayWithWorkout({
+    required this.date,
+    required this.day,
+    required this.entry,
+    required this.dayNames,
+  });
+
+  final DateTime date;
+  final DateTime day;
+  final TrainingModel entry;
+  final List<String> dayNames;
+
+  @override
+  Widget build(BuildContext context) {
+    return Draggable<MapEntry<DateTime, TrainingModel>>(
       data: MapEntry(date, entry),
       feedback: Material(
         color: Colors.transparent,
@@ -231,26 +315,37 @@ class _PlanViewState extends State<PlanView> {
           width: MediaQuery.of(context).size.width - 40,
           child: Opacity(
             opacity: 0.85,
-            child: _buildWorkoutContent(context, day, entry, dayNames),
+            child: _PlanWorkoutContent(
+              day: day,
+              entry: entry,
+              dayNames: dayNames,
+            ),
           ),
         ),
       ),
-      childWhenDragging: _buildEmptyDay(
-        context,
-        day,
-        dayNames,
+      childWhenDragging: _PlanEmptyDay(
+        day: day,
+        dayNames: dayNames,
         isDragging: true,
       ),
-      child: _buildWorkoutContent(context, day, entry, dayNames),
+      child: _PlanWorkoutContent(day: day, entry: entry, dayNames: dayNames),
     );
   }
+}
 
-  Widget _buildWorkoutContent(
-    BuildContext context,
-    DateTime day,
-    TrainingEntry entry,
-    List<String> dayNames,
-  ) {
+class _PlanWorkoutContent extends StatelessWidget {
+  const _PlanWorkoutContent({
+    required this.day,
+    required this.entry,
+    required this.dayNames,
+  });
+
+  final DateTime day;
+  final TrainingModel entry;
+  final List<String> dayNames;
+
+  @override
+  Widget build(BuildContext context) {
     final colors = context.appColors;
     final textTheme = Theme.of(context).textTheme;
     final dayName = dayNames[day.weekday - 1];
@@ -381,12 +476,33 @@ class _PlanViewState extends State<PlanView> {
     );
   }
 
-  Widget _buildEmptyDay(
-    BuildContext context,
-    DateTime day,
-    List<String> dayNames, {
-    bool isDragging = false,
-  }) {
+  IconData _iconForType(String type) {
+    switch (type.toLowerCase()) {
+      case 'arms workout':
+        return Icons.fitness_center;
+      case 'leg workout':
+        return Icons.directions_run;
+      case 'intervals':
+        return Icons.bolt;
+      default:
+        return Icons.sports;
+    }
+  }
+}
+
+class _PlanEmptyDay extends StatelessWidget {
+  const _PlanEmptyDay({
+    required this.day,
+    required this.dayNames,
+    this.isDragging = false,
+  });
+
+  final DateTime day;
+  final List<String> dayNames;
+  final bool isDragging;
+
+  @override
+  Widget build(BuildContext context) {
     final colors = context.appColors;
     final textTheme = Theme.of(context).textTheme;
     final dayName = dayNames[day.weekday - 1];
@@ -433,18 +549,5 @@ class _PlanViewState extends State<PlanView> {
         Divider(height: 1, color: colors.cardBorder, thickness: 0.5),
       ],
     );
-  }
-
-  IconData _iconForType(String type) {
-    switch (type.toLowerCase()) {
-      case 'arms workout':
-        return Icons.fitness_center;
-      case 'leg workout':
-        return Icons.directions_run;
-      case 'intervals':
-        return Icons.bolt;
-      default:
-        return Icons.sports;
-    }
   }
 }

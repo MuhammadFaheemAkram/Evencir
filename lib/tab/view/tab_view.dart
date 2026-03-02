@@ -34,7 +34,7 @@ class _TabBody extends StatelessWidget {
           case TabItem.plan:
             return PlanPage(selectedDate: dateState.selectedDate);
           case TabItem.mood:
-            return const MoodPage();
+            return const MoodView();
           case TabItem.profile:
             return const ProfilePage();
         }

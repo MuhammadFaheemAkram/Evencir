@@ -1,14 +1,14 @@
 import 'package:evencir_project/core/theme/app_colors_extension.dart';
 import 'package:evencir_project/core/utils/app_icons.dart';
 import 'package:evencir_project/features/home/bloc/home_cubit.dart';
+import 'package:evencir_project/features/home/widgets/calories_card.dart';
+import 'package:evencir_project/features/home/widgets/hydration_card.dart';
 import 'package:evencir_project/features/home/widgets/week_view.dart';
+import 'package:evencir_project/features/home/widgets/weight_card.dart';
+import 'package:evencir_project/features/home/widgets/workout_card.dart';
 import 'package:evencir_project/tab/cubit/date_cubit.dart';
-import 'package:evencir_project/widgets/calories_card.dart';
-import 'package:evencir_project/widgets/hydration_card.dart';
 import 'package:evencir_project/widgets/section_header.dart';
 import 'package:evencir_project/widgets/week_calendar.dart';
-import 'package:evencir_project/widgets/weight_card.dart';
-import 'package:evencir_project/widgets/workout_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
