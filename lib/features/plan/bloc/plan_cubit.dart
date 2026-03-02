@@ -6,19 +6,19 @@ import 'package:flutter/material.dart';
 part 'plan_state.dart';
 
 class PlanCubit extends Cubit<PlanState> {
-  PlanCubit({DateTime? initialDate})
+  PlanCubit({required DateTime initialDate})
     : super(
         PlanState(
           plans: const {},
-          selectedDate: initialDate ?? DateTime.now(),
+          selectedDate: initialDate,
           weeks: const [],
           isLoading: false,
         ),
       ) {
-    _initializeDate(initialDate ?? DateTime.now());
+    _initializeDate(initialDate);
   }
 
-  static const _monthNames = [
+  static const List<String> _monthNames = [
     'January',
     'February',
     'March',

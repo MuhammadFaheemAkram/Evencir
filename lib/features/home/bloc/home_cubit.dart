@@ -5,13 +5,13 @@ import 'package:flutter/material.dart';
 part 'home_state.dart';
 
 class HomeCubit extends Cubit<HomeState> {
-  HomeCubit({DateTime? initialDate})
-      : super(
-          HomeState(
-            selectedDate: initialDate ?? DateTime.now(),
-            activityDots: _generateActivityDots(initialDate ?? DateTime.now()),
-          ),
-        );
+  HomeCubit({required DateTime initialDate})
+    : super(
+        HomeState(
+          selectedDate: initialDate,
+          activityDots: _generateActivityDots(initialDate),
+        ),
+      );
 
   /// Format date for display
   String formatDate(DateTime date) {

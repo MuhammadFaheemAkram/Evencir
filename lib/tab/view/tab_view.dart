@@ -26,16 +26,20 @@ class _TabBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    switch (currentTab) {
-      case TabItem.nutrition:
-        return const HomePage();
-      case TabItem.plan:
-        return const PlanPage();
-      case TabItem.mood:
-        return const MoodPage();
-      case TabItem.profile:
-        return const ProfilePage();
-    }
+    return BlocBuilder<DateCubit, DateState>(
+      builder: (context, dateState) {
+        switch (currentTab) {
+          case TabItem.nutrition:
+            return HomePage(selectedDate: dateState.selectedDate);
+          case TabItem.plan:
+            return PlanPage(selectedDate: dateState.selectedDate);
+          case TabItem.mood:
+            return const MoodPage();
+          case TabItem.profile:
+            return const ProfilePage();
+        }
+      },
+    );
   }
 }
 
