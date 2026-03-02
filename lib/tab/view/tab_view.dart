@@ -28,13 +28,13 @@ class _TabBody extends StatelessWidget {
   Widget build(BuildContext context) {
     switch (currentTab) {
       case TabItem.nutrition:
-        return const HomeScreen();
+        return const HomePage();
       case TabItem.plan:
-        return const PlanScreen();
+        return const PlanPage();
       case TabItem.mood:
-        return const MoodScreen();
+        return const MoodPage();
       case TabItem.profile:
-        return const ProfileScreen();
+        return const ProfilePage();
     }
   }
 }

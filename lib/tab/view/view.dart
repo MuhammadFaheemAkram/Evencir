@@ -1,11 +1,13 @@
-import 'package:evencir_project/screens/home_screen.dart';
-import 'package:evencir_project/screens/mood_screen.dart';
-import 'package:evencir_project/screens/plan_screen.dart';
-import 'package:evencir_project/screens/profile_screen.dart';
+import 'package:evencir_project/core/theme/app_colors_extension.dart';
+import 'package:evencir_project/core/utils/app_icons.dart';
+import 'package:evencir_project/features/home/bloc/home_cubit.dart';
+import 'package:evencir_project/features/home/pages/home_page.dart';
+import 'package:evencir_project/features/mood/pages/mood_page.dart';
+import 'package:evencir_project/features/plan/bloc/plan_cubit.dart';
+import 'package:evencir_project/features/plan/pages/plan_page.dart';
+import 'package:evencir_project/features/profile/pages/profile_page.dart';
 import 'package:evencir_project/tab/cubit/tab_cubit.dart';
 import 'package:evencir_project/tab/models/models.dart';
-import 'package:evencir_project/theme/app_colors_extension.dart';
-import 'package:evencir_project/utils/app_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 

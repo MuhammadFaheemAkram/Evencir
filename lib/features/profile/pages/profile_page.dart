@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-class NutritionScreen extends StatelessWidget {
-  const NutritionScreen({super.key});
+class ProfilePage extends StatelessWidget {
+  const ProfilePage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -9,7 +9,7 @@ class NutritionScreen extends StatelessWidget {
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: Center(
         child: Text(
-          'Nutrition',
+          'Profile',
           style: Theme.of(context).textTheme.headlineSmall,
         ),
       ),

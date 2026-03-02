@@ -1,4 +1,4 @@
-import 'package:evencir_project/theme/app_colors_extension.dart';
+import 'package:evencir_project/core/theme/app_colors_extension.dart';
 import 'package:flutter/material.dart';
 
 /// A full month calendar displayed in a bottom sheet.

@@ -1,5 +1,5 @@
-import 'package:evencir_project/theme/app_colors_extension.dart';
-import 'package:evencir_project/utils/app_icons.dart';
+import 'package:evencir_project/core/theme/app_colors_extension.dart';
+import 'package:evencir_project/core/utils/app_icons.dart';
 import 'package:flutter/material.dart';
 
 class WorkoutCard extends StatelessWidget {

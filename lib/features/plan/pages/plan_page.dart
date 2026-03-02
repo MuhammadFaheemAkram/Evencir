@@ -1,58 +1,36 @@
+import 'package:evencir_project/core/theme/app_colors_extension.dart';
+import 'package:evencir_project/core/utils/app_icons.dart';
+import 'package:evencir_project/features/plan/bloc/plan_cubit.dart';
 import 'package:evencir_project/models/training_entry.dart';
-import 'package:evencir_project/theme/app_colors_extension.dart';
-import 'package:evencir_project/utils/app_icons.dart';
-import 'package:evencir_project/utils/date_notifier.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
-class PlanScreen extends StatefulWidget {
-  const PlanScreen({super.key});
+class PlanPage extends StatefulWidget {
+  const PlanPage({super.key});
 
   @override
-  State<PlanScreen> createState() => _PlanScreenState();
+  State<PlanPage> createState() => _PlanPageState();
 }
 
-class _PlanScreenState extends State<PlanScreen> {
-  Map<DateTime, TrainingEntry> _plans = {};
-  final ScrollController _scrollController = ScrollController();
+class _PlanPageState extends State<PlanPage> {
+  late ScrollController _scrollController;
   final Map<int, GlobalKey> _weekKeys = {};
-  DateTime? _lastInitDate;
-
-  static const _monthNames = [
-    'January',
-    'February',
-    'March',
-    'April',
-    'May',
-    'June',
-    'July',
-    'August',
-    'September',
-    'October',
-    'November',
-    'December',
-  ];
 
   static const _dayNames = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
   @override
   void initState() {
     super.initState();
+    _scrollController = ScrollController();
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    final date = context.read<DateNotifier>().selectedDate;
-    final monthKey = DateTime(date.year, date.month);
-    if (_lastInitDate != monthKey) {
-      _lastInitDate = monthKey;
-      _initSamplePlans(date);
-      _weekKeys.clear();
-      WidgetsBinding.instance.addPostFrameCallback(
-        (_) => _scrollToCurrentWeek(date),
-      );
-    }
+    final cubit = context.read<PlanCubit>();
+    WidgetsBinding.instance.addPostFrameCallback(
+      (_) => _scrollToCurrentWeek(cubit.state),
+    );
   }
 
   @override
@@ -61,80 +39,10 @@ class _PlanScreenState extends State<PlanScreen> {
     super.dispose();
   }
 
-  // ── Sample data ──────────────────────────────────────────────────────────
-
-  void _initSamplePlans(DateTime date) {
-    final y = date.year;
-    final m = date.month;
-    _plans = {
-      DateTime(y, m, 8): const TrainingEntry(
-        workoutType: 'Arms Workout',
-        name: 'Arm Blaster',
-        duration: '25m - 30m',
-        badgeColor: Color(0xFF2A8C82),
-      ),
-      DateTime(y, m, 11): const TrainingEntry(
-        workoutType: 'Leg Workout',
-        name: 'Leg Day Blitz',
-        duration: '25m - 30m',
-        badgeColor: Color(0xFF7B61FF),
-      ),
-      DateTime(y, m, 13): const TrainingEntry(
-        workoutType: 'Intervals',
-        name: 'Descending Hi Reps',
-        duration: '6km',
-        badgeColor: Color(0xFF2A8C82),
-      ),
-      DateTime(y, m, 14): const TrainingEntry(
-        workoutType: 'Intervals',
-        name: 'Shorter Intervals',
-        duration: '3km',
-        badgeColor: Color(0xFF2A8C82),
-      ),
-    };
-  }
-
-  // ── Week helpers ─────────────────────────────────────────────────────────
-
-  int _weekOfMonth(DateTime date) {
-    final firstOfMonth = DateTime(date.year, date.month);
-    final firstWeekday = firstOfMonth.weekday - 1; // 0=Mon … 6=Sun
-    return ((date.day + firstWeekday - 1) ~/ 7) + 1;
-  }
-
-  int _totalWeeksInMonth(DateTime date) {
-    final daysInMonth = DateTime(date.year, date.month + 1, 0).day;
-    final lastDay = DateTime(date.year, date.month, daysInMonth);
-    return _weekOfMonth(lastDay);
-  }
-
-  /// Returns weeks of the month as lists of dates (only days in the month).
-  List<List<DateTime>> _weeksOfMonth(DateTime date) {
-    final y = date.year;
-    final m = date.month;
-    final firstDay = DateTime(y, m);
-
-    // Monday of the week containing the 1st
-    DateTime monday = firstDay.subtract(Duration(days: firstDay.weekday - 1));
-
-    final List<List<DateTime>> weeks = [];
-    while (true) {
-      final List<DateTime> weekDays = [];
-      for (int i = 0; i < 7; i++) {
-        final day = monday.add(Duration(days: i));
-        if (day.month == m && day.year == y) {
-          weekDays.add(day);
-        }
-      }
-      if (weekDays.isEmpty) break;
-      weeks.add(weekDays);
-      monday = monday.add(const Duration(days: 7));
-    }
-    return weeks;
-  }
-
-  void _scrollToCurrentWeek(DateTime date) {
-    final currentWeek = _weekOfMonth(date);
+  void _scrollToCurrentWeek(PlanState state) {
+    final currentWeek = context.read<PlanCubit>().weekOfMonth(
+      state.selectedDate,
+    );
     final key = _weekKeys[currentWeek];
     if (key?.currentContext != null) {
       Scrollable.ensureVisible(
@@ -145,114 +53,78 @@ class _PlanScreenState extends State<PlanScreen> {
     }
   }
 
-  String _weekDateRange(List<DateTime> days) {
-    if (days.isEmpty) return '';
-    final first = days.first;
-    final last = days.last;
-    final monthName = _monthNames[first.month - 1];
-    return '$monthName ${first.day}-${last.day}';
-  }
-
-  String _totalTimeForWeek(List<DateTime> days) {
-    int totalMinutes = 0;
-    for (final day in days) {
-      final normalized = DateTime(day.year, day.month, day.day);
-      final entry = _plans[normalized];
-      if (entry != null) {
-        totalMinutes += _parseDuration(entry.duration);
-      }
-    }
-    return 'Total: ${totalMinutes}min';
-  }
-
-  int _parseDuration(String dur) {
-    // e.g. "25m - 30m" → 25, "6km" → 30 (fallback)
-    final match = RegExp(r'(\d+)m').firstMatch(dur);
-    if (match != null) return int.parse(match.group(1)!);
-    return 30; // fallback for non-minute formats
-  }
-
-  void _movePlan(DateTime from, DateTime to) {
-    if (from == to) return;
-    setState(() {
-      final entry = _plans.remove(from);
-      if (entry != null) {
-        final existing = _plans[to];
-        _plans[to] = entry;
-        if (existing != null) {
-          _plans[from] = existing;
-        }
-      }
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
-    final selectedDate = context.watch<DateNotifier>().selectedDate;
-    final weeks = _weeksOfMonth(selectedDate);
-    final totalWeeks = _totalWeeksInMonth(selectedDate);
-    final currentWeekNum = _weekOfMonth(selectedDate);
+    return BlocBuilder<PlanCubit, PlanState>(
+      builder: (context, state) {
+        final textTheme = Theme.of(context).textTheme;
+        final cubit = context.read<PlanCubit>();
+        final totalWeeks = cubit.totalWeeksInMonth(state.selectedDate);
+        final currentWeekNum = cubit.weekOfMonth(state.selectedDate);
 
-    return Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-        leading: Text(
-          'Training Calendar',
-          style: textTheme.headlineSmall?.copyWith(
-            fontWeight: FontWeight.w700,
-            fontSize: 24,
-          ),
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          textAlign: TextAlign.end,
-        ),
-        actions: [
-          GestureDetector(
-            onTap: () {},
-            child: Text(
-              'Save',
-              style: textTheme.titleMedium?.copyWith(
+        return Scaffold(
+          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+          appBar: AppBar(
+            backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+            leading: Text(
+              'Training Calendar',
+              style: textTheme.headlineSmall?.copyWith(
                 fontWeight: FontWeight.w700,
-                fontSize: 18,
+                fontSize: 24,
               ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              textAlign: TextAlign.end,
+            ),
+            actions: [
+              GestureDetector(
+                onTap: () {},
+                child: Text(
+                  'Save',
+                  style: textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w700,
+                    fontSize: 18,
+                  ),
+                ),
+              ),
+            ],
+            actionsPadding: const EdgeInsets.only(right: 16, bottom: 24),
+            leadingWidth: 220,
+          ),
+          body: SafeArea(
+            child: ListView.builder(
+              controller: _scrollController,
+              padding: const EdgeInsets.only(bottom: 24),
+              itemCount: state.weeks.length,
+              itemBuilder: (context, index) {
+                final week = state.weeks[index];
+                final weekNum = cubit.weekOfMonth(week.first);
+                _weekKeys.putIfAbsent(weekNum, () => GlobalKey());
+                return _buildWeekSection(
+                  sectionKey: _weekKeys[weekNum]!,
+                  cubit: cubit,
+                  days: week,
+                  weekNumber: weekNum,
+                  totalWeeks: totalWeeks,
+                  isCurrentWeek: weekNum == currentWeekNum,
+                  plans: state.plans,
+                );
+              },
             ),
           ),
-        ],
-        actionsPadding: const EdgeInsets.only(right: 16, bottom: 24),
-        leadingWidth: 220,
-      ),
-      body: SafeArea(
-        child: ListView.builder(
-          controller: _scrollController,
-          padding: const EdgeInsets.only(bottom: 24),
-          itemCount: weeks.length,
-          itemBuilder: (context, index) {
-            final week = weeks[index];
-            final weekNum = _weekOfMonth(week.first);
-            _weekKeys.putIfAbsent(weekNum, () => GlobalKey());
-            return _buildWeekSection(
-              sectionKey: _weekKeys[weekNum]!,
-              days: week,
-              weekNumber: weekNum,
-              totalWeeks: totalWeeks,
-              isCurrentWeek: weekNum == currentWeekNum,
-            );
-          },
-        ),
-      ),
+        );
+      },
     );
   }
 
-  // ── Week section ─────────────────────────────────────────────────────────
-
   Widget _buildWeekSection({
     required GlobalKey sectionKey,
+    required PlanCubit cubit,
     required List<DateTime> days,
     required int weekNumber,
     required int totalWeeks,
     required bool isCurrentWeek,
+    required Map<DateTime, TrainingEntry> plans,
   }) {
     final colors = context.appColors;
     final textTheme = Theme.of(context).textTheme;
@@ -262,7 +134,7 @@ class _PlanScreenState extends State<PlanScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Teal → blue accent bar
+          // Accent bar
           Container(
             height: 3,
             decoration: BoxDecoration(
@@ -289,7 +161,7 @@ class _PlanScreenState extends State<PlanScreen> {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      _weekDateRange(days),
+                      cubit.weekDateRange(days),
                       style: textTheme.bodyMedium?.copyWith(
                         color: colors.textSecondary,
                         fontSize: 16,
@@ -300,7 +172,7 @@ class _PlanScreenState extends State<PlanScreen> {
                 Padding(
                   padding: const EdgeInsets.only(top: 2),
                   child: Text(
-                    _totalTimeForWeek(days),
+                    cubit.totalTimeForWeek(days),
                     style: textTheme.bodyMedium?.copyWith(
                       color: colors.textSecondary,
                       fontSize: 16,
@@ -312,23 +184,26 @@ class _PlanScreenState extends State<PlanScreen> {
           ),
           const SizedBox(height: 4),
           // Day rows
-          ...days.map((day) => _buildDayRow(day)),
+          ...days.map((day) => _buildDayRow(context, cubit, day, plans)),
           const SizedBox(height: 8),
         ],
       ),
     );
   }
 
-  // ── Day row (drag target wrapper) ────────────────────────────────────────
-
-  Widget _buildDayRow(DateTime day) {
+  Widget _buildDayRow(
+    BuildContext context,
+    PlanCubit cubit,
+    DateTime day,
+    Map<DateTime, TrainingEntry> plans,
+  ) {
     final normalized = DateTime(day.year, day.month, day.day);
-    final entry = _plans[normalized];
+    final entry = plans[normalized];
     final colors = context.appColors;
 
     return DragTarget<MapEntry<DateTime, TrainingEntry>>(
       onAcceptWithDetails: (details) {
-        _movePlan(details.data.key, normalized);
+        cubit.movePlan(details.data.key, normalized);
       },
       builder: (context, candidateData, rejectedData) {
         final isHovering = candidateData.isNotEmpty;
@@ -343,17 +218,23 @@ class _PlanScreenState extends State<PlanScreen> {
             padding: const EdgeInsets.symmetric(horizontal: 20),
             child:
                 entry != null
-                    ? _buildDayWithWorkout(normalized, day, entry)
-                    : _buildEmptyDay(day),
+                    ? _buildDayWithWorkout(
+                      context,
+                      cubit,
+                      normalized,
+                      day,
+                      entry,
+                    )
+                    : _buildEmptyDay(context, day),
           ),
         );
       },
     );
   }
 
-  // ── Day with workout (draggable) ─────────────────────────────────────────
-
   Widget _buildDayWithWorkout(
+    BuildContext context,
+    PlanCubit cubit,
     DateTime date,
     DateTime day,
     TrainingEntry entry,
@@ -366,16 +247,20 @@ class _PlanScreenState extends State<PlanScreen> {
           width: MediaQuery.of(context).size.width - 40,
           child: Opacity(
             opacity: 0.85,
-            child: _buildWorkoutContent(day, entry),
+            child: _buildWorkoutContent(context, day, entry),
           ),
         ),
       ),
-      childWhenDragging: _buildEmptyDay(day, isDragging: true),
-      child: _buildWorkoutContent(day, entry),
+      childWhenDragging: _buildEmptyDay(context, day, isDragging: true),
+      child: _buildWorkoutContent(context, day, entry),
     );
   }
 
-  Widget _buildWorkoutContent(DateTime day, TrainingEntry entry) {
+  Widget _buildWorkoutContent(
+    BuildContext context,
+    DateTime day,
+    TrainingEntry entry,
+  ) {
     final colors = context.appColors;
     final textTheme = Theme.of(context).textTheme;
     final dayName = _dayNames[day.weekday - 1];
@@ -384,7 +269,6 @@ class _PlanScreenState extends State<PlanScreen> {
       padding: const EdgeInsets.symmetric(vertical: 6),
       child: Row(
         children: [
-          // Day label column
           SizedBox(
             width: 36,
             child: Column(
@@ -408,7 +292,6 @@ class _PlanScreenState extends State<PlanScreen> {
             ),
           ),
           const SizedBox(width: 8),
-          // Workout card
           Expanded(
             child: DecoratedBox(
               decoration: BoxDecoration(
@@ -442,7 +325,6 @@ class _PlanScreenState extends State<PlanScreen> {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  // Workout type badge
                                   Container(
                                     padding: const EdgeInsets.symmetric(
                                       horizontal: 8,
@@ -509,9 +391,11 @@ class _PlanScreenState extends State<PlanScreen> {
     );
   }
 
-  // ── Empty day row ────────────────────────────────────────────────────────
-
-  Widget _buildEmptyDay(DateTime day, {bool isDragging = false}) {
+  Widget _buildEmptyDay(
+    BuildContext context,
+    DateTime day, {
+    bool isDragging = false,
+  }) {
     final colors = context.appColors;
     final textTheme = Theme.of(context).textTheme;
     final dayName = _dayNames[day.weekday - 1];
@@ -559,8 +443,6 @@ class _PlanScreenState extends State<PlanScreen> {
       ],
     );
   }
-
-  // ── Helpers ──────────────────────────────────────────────────────────────
 
   IconData _iconForType(String type) {
     switch (type.toLowerCase()) {

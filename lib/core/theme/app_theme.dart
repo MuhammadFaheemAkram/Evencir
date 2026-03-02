@@ -1,4 +1,4 @@
-import 'package:evencir_project/theme/app_colors_extension.dart';
+import 'package:evencir_project/core/theme/app_colors_extension.dart';
 import 'package:flutter/material.dart';
 
 /// Builds the complete light and dark [ThemeData] for the app.

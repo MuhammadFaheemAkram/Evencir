@@ -1,19 +1,19 @@
 import 'dart:math';
 
-import 'package:evencir_project/theme/app_colors_extension.dart';
-import 'package:evencir_project/utils/app_icons.dart';
+import 'package:evencir_project/core/theme/app_colors_extension.dart';
+import 'package:evencir_project/core/utils/app_icons.dart';
 import 'package:evencir_project/widgets/mood_face_painter.dart';
 import 'package:evencir_project/widgets/mood_ring_painter.dart';
 import 'package:flutter/material.dart';
 
-class MoodScreen extends StatefulWidget {
-  const MoodScreen({super.key});
+class MoodPage extends StatefulWidget {
+  const MoodPage({super.key});
 
   @override
-  State<MoodScreen> createState() => _MoodScreenState();
+  State<MoodPage> createState() => _MoodPageState();
 }
 
-class _MoodScreenState extends State<MoodScreen>
+class _MoodPageState extends State<MoodPage>
     with SingleTickerProviderStateMixin {
   /// Angle in radians (0 = top / 12 o'clock, going clockwise 0..2π).
   double _angle = _moodAngles[Mood.calm]!; // default: Calm
