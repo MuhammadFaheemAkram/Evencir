@@ -1,5 +1,6 @@
 import 'package:evencir_project/theme/app_colors_extension.dart';
 import 'package:evencir_project/utils/app_icons.dart';
+import 'package:evencir_project/utils/date_notifier.dart';
 import 'package:evencir_project/widgets/calories_card.dart';
 import 'package:evencir_project/widgets/hydration_card.dart';
 import 'package:evencir_project/widgets/month_calendar_sheet.dart';
@@ -8,15 +9,10 @@ import 'package:evencir_project/widgets/week_calendar.dart';
 import 'package:evencir_project/widgets/weight_card.dart';
 import 'package:evencir_project/widgets/workout_card.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({
-    super.key,
-    required this.selectedDate,
-    required this.onDateChanged,
-  });
-  final DateTime selectedDate;
-  final ValueChanged<DateTime> onDateChanged;
+  const HomeScreen({super.key});
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -45,6 +41,8 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     final colors = context.appColors;
     final textTheme = Theme.of(context).textTheme;
+    final dateNotifier = context.watch<DateNotifier>();
+    final selectedDate = dateNotifier.selectedDate;
 
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
@@ -53,8 +51,8 @@ class _HomeScreenState extends State<HomeScreen> {
           child: AppIcons.svg(AppIcon.notification, color: colors.textPrimary),
         ),
         title: _WeekView(
-          selectedDate: widget.selectedDate,
-          onDateChanged: widget.onDateChanged,
+          selectedDate: selectedDate,
+          onDateChanged: dateNotifier.setDate,
         ),
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         centerTitle: true,
@@ -69,7 +67,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 const SizedBox(height: 12),
                 // ── Date Label ──
                 Text(
-                  _formatDate(widget.selectedDate),
+                  _formatDate(selectedDate),
                   style: textTheme.titleLarge?.copyWith(
                     fontSize: 16,
                     fontWeight: FontWeight.w700,
@@ -79,12 +77,10 @@ class _HomeScreenState extends State<HomeScreen> {
                 const SizedBox(height: 16),
                 // ── Week Calendar ──
                 WeekCalendar(
-                  selectedDate: widget.selectedDate,
-                  onDateSelected: (date) {
-                    widget.onDateChanged(date);
-                  },
-                  // Sample activity dots — replace with real data
-                  activityDots: _sampleActivityDots(),
+                  selectedDate: selectedDate,
+                  onDateSelected: dateNotifier.setDate,
+                  // Sample activity dots — replace with real data source.
+                  activityDots: _sampleActivityDots(selectedDate),
                 ),
                 const SizedBox(height: 28),
                 // ── Workouts Section ──
@@ -155,9 +151,9 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   /// Sample activity dots for the current week — replace with real data source.
-  Map<DateTime, List<Color>> _sampleActivityDots() {
-    final weekday = widget.selectedDate.weekday;
-    final monday = widget.selectedDate.subtract(Duration(days: weekday - 1));
+  Map<DateTime, List<Color>> _sampleActivityDots(DateTime selectedDate) {
+    final weekday = selectedDate.weekday;
+    final monday = selectedDate.subtract(Duration(days: weekday - 1));
     return {
       // Monday (selected) — green
       DateTime(monday.year, monday.month, monday.day + 1): [
@@ -198,6 +194,7 @@ class _WeekView extends StatelessWidget {
           onDateChanged(picked);
         }
       },
+
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [

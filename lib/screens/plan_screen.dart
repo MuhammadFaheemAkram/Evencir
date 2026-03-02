@@ -1,20 +1,22 @@
 import 'package:evencir_project/models/training_entry.dart';
 import 'package:evencir_project/theme/app_colors_extension.dart';
 import 'package:evencir_project/utils/app_icons.dart';
+import 'package:evencir_project/utils/date_notifier.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class PlanScreen extends StatefulWidget {
-  const PlanScreen({super.key, required this.selectedDate});
-  final DateTime selectedDate;
+  const PlanScreen({super.key});
 
   @override
   State<PlanScreen> createState() => _PlanScreenState();
 }
 
 class _PlanScreenState extends State<PlanScreen> {
-  late Map<DateTime, TrainingEntry> _plans;
+  Map<DateTime, TrainingEntry> _plans = {};
   final ScrollController _scrollController = ScrollController();
   final Map<int, GlobalKey> _weekKeys = {};
+  DateTime? _lastInitDate;
 
   static const _monthNames = [
     'January',
@@ -36,19 +38,21 @@ class _PlanScreenState extends State<PlanScreen> {
   @override
   void initState() {
     super.initState();
-    _initSamplePlans();
-    WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToCurrentWeek());
   }
 
   @override
-  void didUpdateWidget(PlanScreen oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.selectedDate.month != widget.selectedDate.month ||
-        oldWidget.selectedDate.year != widget.selectedDate.year) {
-      _initSamplePlans();
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final date = context.read<DateNotifier>().selectedDate;
+    final monthKey = DateTime(date.year, date.month);
+    if (_lastInitDate != monthKey) {
+      _lastInitDate = monthKey;
+      _initSamplePlans(date);
       _weekKeys.clear();
+      WidgetsBinding.instance.addPostFrameCallback(
+        (_) => _scrollToCurrentWeek(date),
+      );
     }
-    WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToCurrentWeek());
   }
 
   @override
@@ -59,9 +63,9 @@ class _PlanScreenState extends State<PlanScreen> {
 
   // ── Sample data ──────────────────────────────────────────────────────────
 
-  void _initSamplePlans() {
-    final y = widget.selectedDate.year;
-    final m = widget.selectedDate.month;
+  void _initSamplePlans(DateTime date) {
+    final y = date.year;
+    final m = date.month;
     _plans = {
       DateTime(y, m, 8): const TrainingEntry(
         workoutType: 'Arms Workout',
@@ -105,9 +109,9 @@ class _PlanScreenState extends State<PlanScreen> {
   }
 
   /// Returns weeks of the month as lists of dates (only days in the month).
-  List<List<DateTime>> _weeksOfMonth() {
-    final y = widget.selectedDate.year;
-    final m = widget.selectedDate.month;
+  List<List<DateTime>> _weeksOfMonth(DateTime date) {
+    final y = date.year;
+    final m = date.month;
     final firstDay = DateTime(y, m);
 
     // Monday of the week containing the 1st
@@ -129,8 +133,8 @@ class _PlanScreenState extends State<PlanScreen> {
     return weeks;
   }
 
-  void _scrollToCurrentWeek() {
-    final currentWeek = _weekOfMonth(widget.selectedDate);
+  void _scrollToCurrentWeek(DateTime date) {
+    final currentWeek = _weekOfMonth(date);
     final key = _weekKeys[currentWeek];
     if (key?.currentContext != null) {
       Scrollable.ensureVisible(
@@ -185,9 +189,10 @@ class _PlanScreenState extends State<PlanScreen> {
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
-    final weeks = _weeksOfMonth();
-    final totalWeeks = _totalWeeksInMonth(widget.selectedDate);
-    final currentWeekNum = _weekOfMonth(widget.selectedDate);
+    final selectedDate = context.watch<DateNotifier>().selectedDate;
+    final weeks = _weeksOfMonth(selectedDate);
+    final totalWeeks = _totalWeeksInMonth(selectedDate);
+    final currentWeekNum = _weekOfMonth(selectedDate);
 
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,

@@ -1,7 +1,9 @@
-import 'package:evencir_project/screens/main_shell.dart';
+import 'package:evencir_project/router/app_router.dart';
 import 'package:evencir_project/theme/app_theme.dart';
+import 'package:evencir_project/utils/date_notifier.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -20,13 +22,16 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Evencir',
-      debugShowCheckedModeBanner: false,
-      theme: AppTheme.light,
-      darkTheme: AppTheme.dark,
-      //themeMode: ThemeMode.system, // follows device setting
-      home: const MainShell(),
+    return ChangeNotifierProvider(
+      create: (_) => DateNotifier(initialDate: DateTime(2024, 12, 22)),
+      child: MaterialApp.router(
+        title: 'Evencir',
+        debugShowCheckedModeBanner: false,
+        theme: AppTheme.light,
+        darkTheme: AppTheme.dark,
+        //themeMode: ThemeMode.system,
+        routerConfig: appRouter,
+      ),
     );
   }
 }
