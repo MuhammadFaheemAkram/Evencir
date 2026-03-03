@@ -11,6 +11,7 @@ class HomeCubit extends Cubit<HomeState> {
         HomeState(
           selectedDate: initialDate,
           activityDots: _generateActivityDots(initialDate),
+          currentHour: DateTime.now().hour,
         ),
       );
 
@@ -23,6 +24,19 @@ class HomeCubit extends Cubit<HomeState> {
         activityDots: _generateActivityDots(date),
       ),
     );
+  }
+
+  /// Update current hour (for day/night detection)
+  void updateCurrentHour() {
+    final hour = DateTime.now().hour;
+    if (hour != state.currentHour) {
+      emit(state.copyWith(currentHour: hour));
+    }
+  }
+
+  /// Check if it's daytime (6 AM to 6 PM)
+  bool isDaytime(int hour) {
+    return hour >= 6 && hour < 18;
   }
 
   /// Generate sample activity dots for the current week

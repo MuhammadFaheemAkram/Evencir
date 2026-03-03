@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:evencir_project/core/theme/app_colors_extension.dart';
 import 'package:evencir_project/core/utils/app_icons.dart';
 import 'package:evencir_project/features/home/bloc/home_cubit.dart';
@@ -52,10 +54,7 @@ class _BodyView extends StatelessWidget {
                   trailing: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      AppIcons.svg(
-                        AppIcon.sun,
-                        color: context.appColors.textPrimary,
-                      ),
+                      const _DayIndicator(),
                       const SizedBox(width: 6),
                       Text(
                         '9°',
@@ -183,6 +182,76 @@ class _DateSection extends StatelessWidget {
               activityDots: state.activityDots,
             ),
           ],
+        );
+      },
+    );
+  }
+}
+
+class _DayIndicator extends StatefulWidget {
+  const _DayIndicator();
+
+  @override
+  State<_DayIndicator> createState() => __DayIndicatorState();
+}
+
+class __DayIndicatorState extends State<_DayIndicator> {
+  Timer? _hourlyUpdateTimer;
+
+  @override
+  void initState() {
+    super.initState();
+    _setupHourlyUpdate();
+  }
+
+  /// Setup hourly update timer
+  void _setupHourlyUpdate() {
+    // Cancel any existing timer
+    _hourlyUpdateTimer?.cancel();
+
+    // Calculate time until next hour
+    final now = DateTime.now();
+    final nextHour = now.add(
+      Duration(
+        hours: 1,
+        minutes: -now.minute,
+        seconds: -now.second,
+        milliseconds: -now.millisecond,
+        microseconds: -now.microsecond,
+      ),
+    );
+    final durationUntilNextHour = nextHour.difference(now);
+
+    _hourlyUpdateTimer = Timer(durationUntilNextHour, () {
+      if (mounted) {
+        context.read<HomeCubit>().updateCurrentHour();
+        _setupHourlyUpdate(); // Setup next update
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _hourlyUpdateTimer?.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<HomeCubit, HomeState>(
+      buildWhen:
+          (previous, current) => previous.currentHour != current.currentHour,
+      builder: (context, state) {
+        final isDaytime = context.read<HomeCubit>().isDaytime(
+          state.currentHour,
+        );
+        final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+        return AppIcons.svg(
+          isDaytime ? AppIcon.sun : AppIcon.moon,
+          color:
+              !isDarkMode && isDaytime
+                  ? Colors.amber
+                  : context.appColors.textPrimary,
         );
       },
     );
