@@ -118,7 +118,7 @@ test/
 
 📷 **Main Dashboard, Mood Tracker, Weekly Plan Views**
 
-[View Screenshots](https://drive.google.com/drive/folders/YOUR_FOLDER_ID) *(Link to be added)*
+[View Screenshots](https://drive.google.com/drive/folders/1c01ez2Cf_hzuIYWZLcrUYXZ05ZU6ISy0?usp=sharing)
 
 ---
 
@@ -126,7 +126,7 @@ test/
 
 Watch a demonstration of the app's full functionality:
 
-[Watch App Demo Video](https://drive.google.com/file/d/YOUR_VIDEO_ID/view) *(Link to be added)*
+[Watch App Demo Video](https://drive.google.com/file/d/1bDxZp-j3DXfFW5oboqucJROXcEc1lgIE/view?usp=sharing)
 
 ---
 
@@ -134,7 +134,7 @@ Watch a demonstration of the app's full functionality:
 
 Download the release APK for testing on Android devices:
 
-[Download APK](https://drive.google.com/file/d/YOUR_APK_ID/view) *(Link to be added)*
+[Download APK](https://drive.google.com/file/d/1tad0BT0V6-eSJP-fMZozxKwhzGyR5YXo/view?usp=drive_link)
 
 **Build Info**: 
 - Flutter SDK: ^3.7.0
