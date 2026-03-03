@@ -52,31 +52,36 @@ class WorkoutCard extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       // Content
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            '$date - $duration',
-                            style: textTheme.bodyMedium?.copyWith(
-                              color: colors.textPrimary,
-                              fontSize: 12,
-                              fontWeight: FontWeight.w700,
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              '$date - $duration',
+                              style: textTheme.bodyMedium?.copyWith(
+                                color: colors.textPrimary,
+                                fontSize: 12,
+                                fontWeight: FontWeight.w700,
+                              ),
                             ),
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            title,
-                            style: textTheme.headlineSmall?.copyWith(
-                              color: colors.textPrimary,
-                              fontSize: 24,
-                              fontWeight: FontWeight.w700,
+                            const SizedBox(height: 8),
+                            Text(
+                              title,
+                              style: textTheme.headlineSmall?.copyWith(
+                                color: colors.textPrimary,
+                                fontSize: 24,
+                                fontWeight: FontWeight.w700,
+                              ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                       // Arrow
-                      AppIcons.svg(AppIcon.rightArrow),
+                      AppIcons.svg(
+                        AppIcon.rightArrow,
+                        color: context.appColors.textPrimary,
+                      ),
                     ],
                   ),
                 ),

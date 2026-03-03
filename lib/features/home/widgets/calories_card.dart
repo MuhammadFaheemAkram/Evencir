@@ -30,20 +30,26 @@ class CaloriesCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Big number + unit
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.baseline,
-            textBaseline: TextBaseline.alphabetic,
-            children: [
-              Text(
-                '$consumed',
-                style: textTheme.headlineLarge?.copyWith(fontSize: 40),
+          Flexible(
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              alignment: Alignment.centerLeft,
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.baseline,
+                textBaseline: TextBaseline.alphabetic,
+                children: [
+                  Text(
+                    '$consumed',
+                    style: textTheme.headlineLarge?.copyWith(fontSize: 40),
+                  ),
+                  const SizedBox(width: 4),
+                  Text(
+                    'Calories',
+                    style: textTheme.titleMedium?.copyWith(fontSize: 18),
+                  ),
+                ],
               ),
-              const SizedBox(width: 4),
-              Text(
-                'Calories',
-                style: textTheme.titleMedium?.copyWith(fontSize: 18),
-              ),
-            ],
+            ),
           ),
           const SizedBox(height: 4),
           Text(

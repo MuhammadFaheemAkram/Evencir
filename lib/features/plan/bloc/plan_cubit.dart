@@ -39,20 +39,12 @@ class PlanCubit extends Cubit<PlanState> {
     emit(state.copyWith(plans: plans, selectedDate: date, weeks: weeks));
   }
 
-  void updateDate(DateTime date) {
-    if (date.year == state.selectedDate.year &&
-        date.month == state.selectedDate.month) {
-      return;
-    }
-    _initializeDate(date);
-  }
-
   /// Initialize sample plans for the month
   Map<DateTime, TrainingModel> _initSamplePlans(DateTime date) {
     final y = date.year;
     final m = date.month;
     return {
-      DateTime(y, m, 8): const TrainingModel(
+      DateTime(y, m, 3): const TrainingModel(
         workoutType: 'Arms Workout',
         name: 'Arm Blaster',
         duration: '25m - 30m',

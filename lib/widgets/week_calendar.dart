@@ -61,6 +61,8 @@ class _WeekCalendarState extends State<WeekCalendar> {
 
   DateTime _normalizeDate(DateTime d) => DateTime(d.year, d.month, d.day);
 
+  final double size = 36;
+
   /// Builds one or more colored dots beneath a calendar day.
   Widget _buildDots(DateTime date, bool isSelected, AppColorsExtension colors) {
     final key = _normalizeDate(date);
@@ -95,19 +97,21 @@ class _WeekCalendarState extends State<WeekCalendar> {
     );
   }
 
-  @override
-  Widget build(BuildContext context) {
+  Widget _buildDayRow(bool scroll) {
     final colors = context.appColors;
     final textTheme = Theme.of(context).textTheme;
-
-    return Column(
-      children: [
-        // Day labels row
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: List.generate(7, (index) {
-            return SizedBox(
-              width: 40,
+    return Row(
+      mainAxisAlignment:
+          scroll ? MainAxisAlignment.start : MainAxisAlignment.spaceAround,
+      spacing: 14,
+      children: List.generate(7, (index) {
+        final date = _weekDays[index];
+        final isSelected = _isSameDay(date, _selectedDate);
+        return Column(
+          children: [
+            // Day labels
+            SizedBox(
+              width: 36,
               child: Center(
                 child: Text(
                   _dayLabels[index],
@@ -117,61 +121,73 @@ class _WeekCalendarState extends State<WeekCalendar> {
                   ),
                 ),
               ),
-            );
-          }),
-        ),
-        const SizedBox(height: 8),
-        // Date numbers row
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: List.generate(7, (index) {
-            final date = _weekDays[index];
-            final isSelected = _isSameDay(date, _selectedDate);
-
-            return GestureDetector(
+            ),
+            const SizedBox(height: 8),
+            // Date Circles
+            GestureDetector(
               onTap: () {
                 setState(() {
                   _selectedDate = date;
                 });
                 widget.onDateSelected?.call(date);
               },
-              child: Column(
-                children: [
-                  Container(
-                    width: 36,
-                    height: 36,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color:
-                          isSelected
-                              ? colors.daySelectedBorder.withValues(alpha: 0.19)
-                              : colors.dayUnselected,
-                      border:
-                          isSelected
-                              ? Border.all(
-                                color: colors.daySelectedBorder,
-                                width: 2,
-                              )
-                              : null,
-                    ),
-                    child: Center(
-                      child: Text(
-                        '${date.day}',
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w700,
-                          color: colors.textPrimary,
-                        ),
-                      ),
+              child: Container(
+                width: size,
+                height: size,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color:
+                      isSelected
+                          ? colors.daySelectedBorder.withValues(alpha: 0.19)
+                          : colors.dayUnselected,
+                  border:
+                      isSelected
+                          ? Border.all(
+                            color: colors.daySelectedBorder,
+                            width: 2,
+                          )
+                          : null,
+                ),
+                child: Center(
+                  child: Text(
+                    '${date.day}',
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700,
+                      color: colors.textPrimary,
                     ),
                   ),
-                  const SizedBox(height: 6),
-                  // Activity dot indicators (supports multiple colored dots)
-                  _buildDots(date, isSelected, colors),
-                ],
+                ),
               ),
+            ),
+            const SizedBox(height: 6),
+            // Activity dot indicators (supports multiple colored dots)
+            _buildDots(date, isSelected, colors),
+          ],
+        );
+      }),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        // Date numbers row
+        LayoutBuilder(
+          builder: (context, constraints) {
+            final max = constraints.maxWidth;
+            final width =
+                (7.0 * size) + (6.0 * 14); // 7 days * 36px + 6 spaces * 12px
+            if (max > width) {
+              return Center(child: _buildDayRow(false));
+            }
+            return SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: _buildDayRow(true),
             );
-          }),
+          },
         ),
         const SizedBox(height: 24),
         // Page indicator
@@ -179,7 +195,7 @@ class _WeekCalendarState extends State<WeekCalendar> {
           width: 32,
           height: 5,
           decoration: BoxDecoration(
-            color: colors.textTertiary,
+            color: context.appColors.textTertiary,
             borderRadius: BorderRadius.circular(2),
           ),
         ),

@@ -55,7 +55,7 @@ class _PlanAppBar extends StatelessWidget implements PreferredSizeWidget {
   const _PlanAppBar();
 
   @override
-  final preferredSize = const Size.fromHeight(kToolbarHeight + 24);
+  final preferredSize = const Size.fromHeight(kToolbarHeight);
 
   @override
   Widget build(BuildContext context) {
